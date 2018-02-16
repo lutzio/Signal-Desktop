@@ -2,12 +2,6 @@ const MIME = require('./mime');
 const { arrayBufferToBlob, blobToArrayBuffer, dataURLToBlob } = require('blob-util');
 const { autoOrientImage } = require('../auto_orient_image');
 
-// Increment this everytime we change how attachments are upgraded. This allows us to
-// retroactively upgrade existing attachments. As we add more upgrade steps, we could
-// design a pipeline that does this incrementally, e.g. from version 0 (unknown) -> 1,
-// 1 --> 2, etc., similar to how we do database migrations:
-const CURRENT_PROCESS_VERSION = 1;
-
 // Schema version history
 //
 // Version 1
@@ -95,4 +89,4 @@ const autoOrientJPEG = async (attachment) => {
 
 // Public API
 // UpgradeStep
-exports.upgradeSchema = setSchemaVersion(autoOrientJPEG, CURRENT_PROCESS_VERSION);
+exports.upgradeSchema = setSchemaVersion(autoOrientJPEG, 1);
