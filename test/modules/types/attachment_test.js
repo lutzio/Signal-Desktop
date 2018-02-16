@@ -1,3 +1,5 @@
+require('mocha-testcheck').install();
+
 const { assert } = require('chai');
 
 const Attachment = require('../../../js/modules/types/attachment');
@@ -43,5 +45,24 @@ describe('Attachment', () => {
       const actual = await Attachment.replaceUnicodeOrderOverrides(input);
       assert.deepEqual(actual, expected);
     });
+
+    const hasNoUnicodeOrderOverrides = value =>
+      !value.includes('\u202D') && !value.includes('\u202E');
+
+    check.it('should ignore non-order-override characters',
+      gen.string.suchThat(hasNoUnicodeOrderOverrides),
+      fileName => {
+        const input = {
+          contentType: 'image/jpeg',
+          data: null,
+          fileName,
+          size: 1111,
+          schemaVersion: 1,
+        };
+
+        const actual = Attachment.replaceUnicodeOrderOverridesSync(input);
+        assert.deepEqual(actual, input);
+      }
+    );
   });
 });

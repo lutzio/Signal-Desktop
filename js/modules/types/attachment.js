@@ -94,7 +94,10 @@ const autoOrientJPEG = async (attachment) => {
 const UNICODE_LEFT_TO_RIGHT_OVERRIDE = '\u202D';
 const UNICODE_RIGHT_TO_LEFT_OVERRIDE = '\u202E';
 const UNICODE_REPLACEMENT_CHARACTER = '\uFFFD';
-exports.replaceUnicodeOrderOverrides = async (attachment) => {
+// NOTE: Expose synchronous version to do property-based testing using `testcheck`,
+// which currently doesn’t support async testing:
+// https://github.com/leebyron/testcheck-js/issues/45
+exports.replaceUnicodeOrderOverridesSync = (attachment) => {
   if (!isString(attachment.fileName)) {
     return attachment;
   }
@@ -108,6 +111,9 @@ exports.replaceUnicodeOrderOverrides = async (attachment) => {
 
   return newAttachment;
 };
+
+exports.replaceUnicodeOrderOverrides = async attachment =>
+  exports.replaceUnicodeOrderOverridesSync(attachment)
 
 // Public API
 // UpgradeStep
