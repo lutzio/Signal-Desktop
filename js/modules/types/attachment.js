@@ -38,8 +38,8 @@ const { autoOrientImage } = require('../auto_orient_image');
 // Middleware
 // type UpgradeStep = Attachment -> Promise Attachment
 
-// UpgradeStep -> SchemaVersion -> UpgradeStep
-const setSchemaVersion = (next, schemaVersion) => async (attachment) => {
+// SchemaVersion -> UpgradeStep -> UpgradeStep
+const withSchemaVersion = (schemaVersion, next) => async (attachment) => {
   const isAlreadyUpgraded = attachment.schemaVersion >= schemaVersion;
   if (isAlreadyUpgraded) {
     return attachment;
@@ -49,7 +49,7 @@ const setSchemaVersion = (next, schemaVersion) => async (attachment) => {
   try {
     upgradedAttachment = await next(attachment);
   } catch (error) {
-    console.error('Attachment.setSchemaVersion: error:', error);
+    console.error('Attachment.withSchemaVersion: error:', error);
     upgradedAttachment = null;
   }
 
@@ -116,8 +116,8 @@ exports.replaceUnicodeOrderOverrides = async attachment =>
   exports.replaceUnicodeOrderOverridesSync(attachment)
 
 // Public API
-const toVersion1 = setSchemaVersion(autoOrientJPEG, 1);
-const toVersion2 = setSchemaVersion(exports.replaceUnicodeOrderOverrides, 2);
+const toVersion1 = withSchemaVersion(1, autoOrientJPEG);
+const toVersion2 = withSchemaVersion(2, exports.replaceUnicodeOrderOverrides);
 
 // UpgradeStep
 exports.upgradeSchema = attachment =>
