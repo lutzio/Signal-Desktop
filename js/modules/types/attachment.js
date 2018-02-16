@@ -4,6 +4,12 @@ const MIME = require('./mime');
 const { arrayBufferToBlob, blobToArrayBuffer, dataURLToBlob } = require('blob-util');
 const { autoOrientImage } = require('../auto_orient_image');
 
+// Increment this version number every time we change how attachments are upgraded. This
+// will allow us to retroactively upgrade existing attachments. As we add more upgrade
+// steps, we could design a pipeline that does this incrementally, e.g. from
+// version 0 / unknown -> 1, 1 --> 2, etc., similar to how we do database migrations:
+exports.CURRENT_SCHEMA_VERSION = 2;
+
 // Schema version history
 //
 // Version 1

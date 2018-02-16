@@ -5,6 +5,27 @@ const { assert } = require('chai');
 const Attachment = require('../../../js/modules/types/attachment');
 
 describe('Attachment', () => {
+  describe('upgradeSchema', () => {
+    it('should upgrade an unversioned attachment to the latest version', async () =>{
+      const input = {
+        contentType: 'application/json',
+        data: null,
+        fileName: 'test\u202Dfig.exe',
+        size: 1111,
+      };
+      const expected = {
+        contentType: 'application/json',
+        data: null,
+        fileName: 'test\uFFFDfig.exe',
+        size: 1111,
+        schemaVersion: Attachment.CURRENT_SCHEMA_VERSION,
+      };
+
+      const actual = await Attachment.upgradeSchema(input);
+      assert.deepEqual(actual, expected);
+    });
+  });
+
   describe('replaceUnicodeOrderOverrides', () => {
     it('should sanitize left-to-right order override character', async () => {
       const input = {
