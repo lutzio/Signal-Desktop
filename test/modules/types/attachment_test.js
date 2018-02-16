@@ -6,7 +6,7 @@ const Attachment = require('../../../js/modules/types/attachment');
 
 describe('Attachment', () => {
   describe('upgradeSchema', () => {
-    it('should upgrade an unversioned attachment to the latest version', async () =>{
+    it('should upgrade an unversioned attachment to the latest version', async () => {
       const input = {
         contentType: 'application/json',
         data: null,
@@ -27,7 +27,7 @@ describe('Attachment', () => {
   });
 
   describe('withSchemaVersion', () => {
-    it('should require a version number', async () =>{
+    it('should require a version number', async () => {
       const toVersionX = () => {};
       assert.throws(
         () => Attachment.withSchemaVersion(toVersionX, 2),
@@ -35,14 +35,14 @@ describe('Attachment', () => {
       );
     });
 
-    it('should require an upgrade function', async () =>{
+    it('should require an upgrade function', async () => {
       assert.throws(
         () => Attachment.withSchemaVersion(2, 3),
         '`upgrade` must be a function'
       );
     });
 
-    it('should skip upgrading if attachment has already been upgraded', async () =>{
+    it('should skip upgrading if attachment has already been upgraded', async () => {
       const upgrade = async attachment =>
         Object.assign({}, attachment, { foo: true });
       const upgradeWithVersion = Attachment.withSchemaVersion(3, upgrade);
@@ -58,8 +58,8 @@ describe('Attachment', () => {
       assert.deepEqual(actual, input);
     });
 
-    it('should return original attachment if upgrade function throws', async () =>{
-      const upgrade = async attachment => {
+    it('should return original attachment if upgrade function throws', async () => {
+      const upgrade = async () => {
         throw new Error('boom!');
       };
       const upgradeWithVersion = Attachment.withSchemaVersion(3, upgrade);
@@ -74,8 +74,8 @@ describe('Attachment', () => {
       assert.deepEqual(actual, input);
     });
 
-    it('should return original attachment if upgrade function returns null', async () =>{
-      const upgrade = async attachment => null;
+    it('should return original attachment if upgrade function returns null', async () => {
+      const upgrade = async () => null;
       const upgradeWithVersion = Attachment.withSchemaVersion(3, upgrade);
 
       const input = {
@@ -133,9 +133,10 @@ describe('Attachment', () => {
     const hasNoUnicodeOrderOverrides = value =>
       !value.includes('\u202D') && !value.includes('\u202E');
 
-    check.it('should ignore non-order-override characters',
+    check.it(
+      'should ignore non-order-override characters',
       gen.string.suchThat(hasNoUnicodeOrderOverrides),
-      fileName => {
+      (fileName) => {
         const input = {
           contentType: 'image/jpeg',
           data: null,

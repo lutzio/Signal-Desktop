@@ -80,7 +80,7 @@ exports.withSchemaVersion = (schemaVersion, upgrade) => {
       { schemaVersion }
     );
   };
-}
+};
 
 // Upgrade steps
 const autoOrientJPEG = async (attachment) => {
@@ -130,7 +130,7 @@ exports.replaceUnicodeOrderOverridesSync = (attachment) => {
 };
 
 exports.replaceUnicodeOrderOverrides = async attachment =>
-  exports.replaceUnicodeOrderOverridesSync(attachment)
+  exports.replaceUnicodeOrderOverridesSync(attachment);
 
 // Public API
 const toVersion1 = exports.withSchemaVersion(1, autoOrientJPEG);
