@@ -116,5 +116,9 @@ exports.replaceUnicodeOrderOverrides = async attachment =>
   exports.replaceUnicodeOrderOverridesSync(attachment)
 
 // Public API
+const toVersion1 = setSchemaVersion(autoOrientJPEG, 1);
+const toVersion2 = setSchemaVersion(exports.replaceUnicodeOrderOverrides, 2);
+
 // UpgradeStep
-exports.upgradeSchema = setSchemaVersion(autoOrientJPEG, 1);
+exports.upgradeSchema = attachment =>
+  toVersion1(attachment).then(toVersion2);
