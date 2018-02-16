@@ -1,3 +1,5 @@
+const isString = require('lodash/isString');
+
 const MIME = require('./mime');
 const { arrayBufferToBlob, blobToArrayBuffer, dataURLToBlob } = require('blob-util');
 const { autoOrientImage } = require('../auto_orient_image');
@@ -7,6 +9,8 @@ const { autoOrientImage } = require('../auto_orient_image');
 // Version 1
 //   - Auto-orient JPEG attachments using EXIF `Orientation` data
 //   - Add `schemaVersion` property
+// Version 2
+//   - Sanitize Unicode order override characters
 
 // // Incoming message attachment fields
 // {
@@ -83,6 +87,24 @@ const autoOrientJPEG = async (attachment) => {
 
   // `digest` is no longer valid for auto-oriented image data, so we discard it:
   delete newAttachment.digest;
+
+  return newAttachment;
+};
+
+const UNICODE_LEFT_TO_RIGHT_OVERRIDE = '\u202D';
+const UNICODE_RIGHT_TO_LEFT_OVERRIDE = '\u202E';
+const UNICODE_REPLACEMENT_CHARACTER = '\uFFFD';
+exports.replaceUnicodeOrderOverrides = async (attachment) => {
+  if (!isString(attachment.fileName)) {
+    return attachment;
+  }
+
+  const normalizedFilename = attachment.fileName
+    .replace(UNICODE_LEFT_TO_RIGHT_OVERRIDE, UNICODE_REPLACEMENT_CHARACTER)
+    .replace(UNICODE_RIGHT_TO_LEFT_OVERRIDE, UNICODE_REPLACEMENT_CHARACTER);
+  const newAttachment = Object.assign({}, attachment, {
+    fileName: normalizedFilename,
+  });
 
   return newAttachment;
 };
