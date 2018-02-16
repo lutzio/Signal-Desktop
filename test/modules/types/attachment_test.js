@@ -26,6 +26,69 @@ describe('Attachment', () => {
     });
   });
 
+  describe('withSchemaVersion', () => {
+    it('should require a version number', async () =>{
+      const toVersionX = () => {};
+      assert.throws(
+        () => Attachment.withSchemaVersion(toVersionX, 2),
+        '`schemaVersion` must be a number'
+      );
+    });
+
+    it('should require an upgrade function', async () =>{
+      assert.throws(
+        () => Attachment.withSchemaVersion(2, 3),
+        '`upgrade` must be a function'
+      );
+    });
+
+    it('should skip upgrading if attachment has already been upgraded', async () =>{
+      const upgrade = async attachment =>
+        Object.assign({}, attachment, { foo: true });
+      const upgradeWithVersion = Attachment.withSchemaVersion(3, upgrade);
+
+      const input = {
+        contentType: 'image/gif',
+        data: null,
+        fileName: 'foo.gif',
+        size: 1111,
+        schemaVersion: 4,
+      };
+      const actual = await upgradeWithVersion(input);
+      assert.deepEqual(actual, input);
+    });
+
+    it('should return original attachment if upgrade function throws', async () =>{
+      const upgrade = async attachment => {
+        throw new Error('boom!');
+      };
+      const upgradeWithVersion = Attachment.withSchemaVersion(3, upgrade);
+
+      const input = {
+        contentType: 'image/gif',
+        data: null,
+        fileName: 'foo.gif',
+        size: 1111,
+      };
+      const actual = await upgradeWithVersion(input);
+      assert.deepEqual(actual, input);
+    });
+
+    it('should return original attachment if upgrade function returns null', async () =>{
+      const upgrade = async attachment => null;
+      const upgradeWithVersion = Attachment.withSchemaVersion(3, upgrade);
+
+      const input = {
+        contentType: 'image/gif',
+        data: null,
+        fileName: 'foo.gif',
+        size: 1111,
+      };
+      const actual = await upgradeWithVersion(input);
+      assert.deepEqual(actual, input);
+    });
+  });
+
   describe('replaceUnicodeOrderOverrides', () => {
     it('should sanitize left-to-right order override character', async () => {
       const input = {

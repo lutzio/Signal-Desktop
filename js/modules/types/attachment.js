@@ -1,3 +1,5 @@
+const isFunction = require('lodash/isFunction');
+const isNumber = require('lodash/isNumber');
 const isString = require('lodash/isString');
 
 const MIME = require('./mime');
@@ -45,31 +47,40 @@ exports.CURRENT_SCHEMA_VERSION = 2;
 // type UpgradeStep = Attachment -> Promise Attachment
 
 // SchemaVersion -> UpgradeStep -> UpgradeStep
-const withSchemaVersion = (schemaVersion, next) => async (attachment) => {
-  const isAlreadyUpgraded = attachment.schemaVersion >= schemaVersion;
-  if (isAlreadyUpgraded) {
-    return attachment;
+exports.withSchemaVersion = (schemaVersion, upgrade) => {
+  if (!isNumber(schemaVersion)) {
+    throw new TypeError('`schemaVersion` must be a number');
+  }
+  if (!isFunction(upgrade)) {
+    throw new TypeError('`upgrade` must be a function');
   }
 
-  let upgradedAttachment;
-  try {
-    upgradedAttachment = await next(attachment);
-  } catch (error) {
-    console.error('Attachment.withSchemaVersion: error:', error);
-    upgradedAttachment = null;
-  }
+  return async (attachment) => {
+    const isAlreadyUpgraded = attachment.schemaVersion >= schemaVersion;
+    if (isAlreadyUpgraded) {
+      return attachment;
+    }
 
-  const hasSuccessfullyUpgraded = upgradedAttachment !== null;
-  if (!hasSuccessfullyUpgraded) {
-    return attachment;
-  }
+    let upgradedAttachment;
+    try {
+      upgradedAttachment = await upgrade(attachment);
+    } catch (error) {
+      console.error('Attachment.withSchemaVersion: error:', error);
+      upgradedAttachment = null;
+    }
 
-  return Object.assign(
-    {},
-    upgradedAttachment,
-    { schemaVersion }
-  );
-};
+    const hasSuccessfullyUpgraded = upgradedAttachment !== null;
+    if (!hasSuccessfullyUpgraded) {
+      return attachment;
+    }
+
+    return Object.assign(
+      {},
+      upgradedAttachment,
+      { schemaVersion }
+    );
+  };
+}
 
 // Upgrade steps
 const autoOrientJPEG = async (attachment) => {
@@ -122,8 +133,8 @@ exports.replaceUnicodeOrderOverrides = async attachment =>
   exports.replaceUnicodeOrderOverridesSync(attachment)
 
 // Public API
-const toVersion1 = withSchemaVersion(1, autoOrientJPEG);
-const toVersion2 = withSchemaVersion(2, exports.replaceUnicodeOrderOverrides);
+const toVersion1 = exports.withSchemaVersion(1, autoOrientJPEG);
+const toVersion2 = exports.withSchemaVersion(2, exports.replaceUnicodeOrderOverrides);
 
 // UpgradeStep
 exports.upgradeSchema = attachment =>
