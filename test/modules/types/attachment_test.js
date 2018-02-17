@@ -130,6 +130,26 @@ describe('Attachment', () => {
       assert.deepEqual(actual, expected);
     });
 
+    it('should sanitize multiple override characters', async () => {
+      const input = {
+        contentType: 'image/jpeg',
+        data: null,
+        fileName: 'test\u202e\u202dlol\u202efig.exe',
+        size: 1111,
+        schemaVersion: 1,
+      };
+      const expected = {
+        contentType: 'image/jpeg',
+        data: null,
+        fileName: 'test\uFFFD\uFFFDlol\uFFFDfig.exe',
+        size: 1111,
+        schemaVersion: 1,
+      };
+
+      const actual = await Attachment.replaceUnicodeOrderOverrides(input);
+      assert.deepEqual(actual, expected);
+    });
+
     const hasNoUnicodeOrderOverrides = value =>
       !value.includes('\u202D') && !value.includes('\u202E');
 

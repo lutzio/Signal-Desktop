@@ -111,6 +111,10 @@ const autoOrientJPEG = async (attachment) => {
 const UNICODE_LEFT_TO_RIGHT_OVERRIDE = '\u202D';
 const UNICODE_RIGHT_TO_LEFT_OVERRIDE = '\u202E';
 const UNICODE_REPLACEMENT_CHARACTER = '\uFFFD';
+const INVALID_CHARACTERS_PATTERN = new RegExp(
+  `[${UNICODE_LEFT_TO_RIGHT_OVERRIDE}${UNICODE_RIGHT_TO_LEFT_OVERRIDE}]`,
+  'g'
+);
 // NOTE: Expose synchronous version to do property-based testing using `testcheck`,
 // which currently doesn’t support async testing:
 // https://github.com/leebyron/testcheck-js/issues/45
@@ -119,9 +123,10 @@ exports.replaceUnicodeOrderOverridesSync = (attachment) => {
     return attachment;
   }
 
-  const normalizedFilename = attachment.fileName
-    .replace(UNICODE_LEFT_TO_RIGHT_OVERRIDE, UNICODE_REPLACEMENT_CHARACTER)
-    .replace(UNICODE_RIGHT_TO_LEFT_OVERRIDE, UNICODE_REPLACEMENT_CHARACTER);
+  const normalizedFilename = attachment.fileName.replace(
+    INVALID_CHARACTERS_PATTERN,
+    UNICODE_REPLACEMENT_CHARACTER
+  );
   const newAttachment = Object.assign({}, attachment, {
     fileName: normalizedFilename,
   });
